@@ -8,8 +8,5 @@ __pycache__/
 # Local database/vector store
 chroma_db/
 
-# Local data (if it contains personal/large files)
-data/
-
 # OS generated files
 .DS_Store
