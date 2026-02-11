@@ -1,25 +1,76 @@
-EduRAG: Smart Education using RAG (Streamlit Edition)EduRAG is an AI-powered educational tool designed to provide fact-grounded answers to student queries directly from NCERT textbooks. This project leverages a Retrieval-Augmented Generation (RAG) pipeline to ensure that the information provided is accurate, relevant, and free from the noise of unverified internet sources.This version features a simple and interactive frontend built with Streamlit.How to Run This ProjectFollow these steps to get your EduRAG application running locally.Prerequisites:Python 3.8 or higherpip (Python package installer)Step 1: Set Up Your Project FolderCreate a new folder for your project (e.g., EduRAG_Streamlit).Inside this folder, create the four files I provided: streamlit_app.py, ingest.py, requirements.txt, and this README.md.Create a folder named data. This is where you will place your NCERT textbook PDFs.Your folder structure should look like this:EduRAG_Streamlit/
-│
+# MindfulRAG: Mental Health Support Assistant using RAG
+
+MindfulRAG is an AI-powered mental health support assistant that provides empathetic, evidence-informed responses grounded in mental health literature. It uses a Retrieval-Augmented Generation (RAG) pipeline to ensure responses are informed by trusted reference material, while maintaining a warm, non-judgmental tone.
+
+> **Disclaimer:** This tool is NOT a substitute for professional mental health care. If you are in crisis, please contact a helpline or a mental health professional.
+
+## Features
+
+- **Empathetic conversations** — warm, supportive, non-clinical emotional support
+- **RAG-powered** — responses grounded in ingested mental health literature
+- **Multimodal input** — text, voice, and image support
+- **Multilingual** — supports 15+ languages including major Indian languages
+- **Conversation memory** — maintains context across the chat session
+
+## How to Run This Project
+
+### Prerequisites
+- Python 3.8 or higher
+- pip (Python package installer)
+
+### Step 1: Set Up Your Project Folder
+
+Your folder structure should look like this:
+
+```
+MindfulRAG/
 ├── data/
-│   └── (Your NCERT PDFs go here)
-│
-├── streamlit_app.py
+│   └── (Your mental health resource PDFs go here)
+├── backend_multimodal.py
+├── streamlit_app_multilingual.py
 ├── ingest.py
 ├── requirements.txt
 └── README.md
-Step 2: Create a Virtual EnvironmentOpen your terminal or command prompt, navigate into your project folder, and run the following commands to create and activate a Python virtual environment.# Navigate to your project directory
-cd EduRAG_Streamlit
+```
 
-# Create the virtual environment
+### Step 2: Create a Virtual Environment
+
+```bash
+cd MindfulRAG
 python -m venv venv
 
-# Activate it
 # On macOS/Linux:
 source venv/bin/activate
 # On Windows:
 venv\Scripts\activate
-Step 3: Install DependenciesWith your virtual environment active, install all the necessary libraries from the requirements.txt file.pip install -r requirements.txt
-Step 4: Add Your API KeyIn the main project folder (EduRAG_Streamlit), create a new file named .env.Open this file and add your Google Gemini API key like this:GEMINI_API_KEY="YOUR_API_KEY_HERE"
-Step 5: Process Your TextbooksAdd your NCERT textbook PDF files into the data folder.Run the ingest.py script from your terminal. This will read the PDFs, process them, and create a faiss_index folder. You only need to do this once.python ingest.py
-This step might take a few minutes depending on the size of your textbooks.Step 6: Run the Streamlit AppYou're all set! Start the application by running the following command in your terminal:streamlit run streamlit_app.py
-Your web browser should automatically open with the EduRAG chat application running. You can now start asking questions!
+```
+
+### Step 3: Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### Step 4: Add Your API Key
+
+Create a `.env` file in the project root:
+
+```
+GOOGLE_API_KEY="YOUR_API_KEY_HERE"
+```
+
+### Step 5: Process Your Documents
+
+Add your mental health resource PDFs into the `data/` folder, then run:
+
+```bash
+python ingest.py
+```
+
+### Step 6: Run the App
+
+```bash
+streamlit run streamlit_app_multilingual.py
+```
+
+Your browser will open with the MindfulRAG assistant ready to chat.

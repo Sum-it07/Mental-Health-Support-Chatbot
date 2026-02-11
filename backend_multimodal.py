@@ -1,8 +1,13 @@
 # backend_multimodal.py
 """
-Backend logic for EduRAG Multilingual: model loading, search, and preprocessing functions.
+Backend logic for MindfulRAG: model loading, search, and preprocessing functions
+for the mental health support assistant.
 """
+import asyncio
+import base64
+import io
 import os
+
 from dotenv import load_dotenv
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
@@ -10,8 +15,6 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from langchain_google_genai import ChatGoogleGenerativeAI
 from PIL import Image
-import io
-import base64
 
 # --- CONFIGURATION ---
 VECTOR_STORE_PATH = "chroma_db"
@@ -20,9 +23,27 @@ GEMINI_MODEL_NAME = "gemini-2.5-flash"
 
 load_dotenv()
 
+
+def ensure_event_loop() -> asyncio.AbstractEventLoop:
+    """Return an active event loop for the current thread."""
+    try:
+        return asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        return loop
+
+
+if os.name == "nt":  # Streamlit runs on a background thread on Windows
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 def load_models():
+    ensure_event_loop()
     from langchain_community.embeddings import HuggingFaceEmbeddings
-    embeddings = HuggingFaceEmbeddings(model_name=MODEL_NAME)
+    embeddings = HuggingFaceEmbeddings(
+        model_name=MODEL_NAME,
+        model_kwargs={"device": "cpu"}
+    )
     if not os.path.exists(VECTOR_STORE_PATH):
         raise FileNotFoundError(f"Chroma database not found at '{VECTOR_STORE_PATH}'. Please run 'python ingest.py' first.")
     vectorstore = Chroma(
@@ -35,24 +56,25 @@ def load_models():
         google_api_key=os.getenv("GOOGLE_API_KEY")
     )
     prompt_template = """
-You are an expert educational assistant helping students with NCERT textbooks. You are having a conversation with a student and should respond in a helpful, conversational manner.
+You are a compassionate mental health support assistant. You provide empathetic, non-judgmental emotional support grounded in evidence-based techniques from the provided reference material.
 
-Instructions:
-1. Use the provided context from textbooks to answer questions
-2. Reference previous parts of the conversation when relevant
-3. Be conversational and encouraging
-4. If no direct answer exists in the context, look for related information
-5. Mention chapter titles, sections, or topics when they help explain concepts
-6. Only if absolutely no relevant information exists, suggest how the student might rephrase their question
-7. Keep your responses engaging and educational
+Important guidelines:
+- You are NOT a therapist or medical professional. Never diagnose or prescribe.
+- Use warm, simple, human language.
+- Validate feelings without reinforcing hopelessness or negativity.
+- Use the provided context from mental health literature to inform your responses.
+- Reference previous parts of the conversation when relevant.
+- Offer optional coping techniques (breathing, grounding, reflection) when appropriate.
+- If distress sounds severe, gently suggest seeking professional human support.
+- Keep your responses supportive, calm, and respectful.
 
 Previous conversation:
 {conversation_history}
 
-Context from textbook(s):
+Reference material:
 {context}
 
-Student's Question: {question}
+User's message: {question}
 
 Your Response:
 """
@@ -86,23 +108,23 @@ def hybrid_search(vectorstore, query, k=5):
 
 def preprocess_query(query):
     processed_query = query.lower().strip()
-    physics_synonyms = {
-        "chapters": ["topics", "sections", "units"],
-        "physics": ["physical science", "mechanics", "motion"],
-        "energy": ["power", "force", "work"],
-        "conservation": ["preservation", "constant"],
-        "law": ["principle", "rule", "theorem"],
-        "motion": ["movement", "kinematics"],
-        "electricity": ["electric", "electrical", "current"],
-        "magnetism": ["magnetic", "magnet"],
-        "light": ["optics", "optical", "rays"],
-        "waves": ["wave", "vibration", "oscillation"]
+    mental_health_synonyms = {
+        "anxiety": ["anxious", "worry", "nervous", "panic", "fear"],
+        "depression": ["depressed", "sad", "hopeless", "low mood", "despair"],
+        "stress": ["stressed", "overwhelmed", "burnout", "pressure", "tension"],
+        "therapy": ["counseling", "treatment", "psychotherapy", "intervention"],
+        "coping": ["managing", "handling", "dealing", "strategies", "techniques"],
+        "trauma": ["ptsd", "traumatic", "distress", "adverse experience"],
+        "sleep": ["insomnia", "sleepless", "rest", "fatigue"],
+        "mindfulness": ["meditation", "breathing", "grounding", "relaxation"],
+        "self-care": ["wellness", "wellbeing", "self-help", "resilience"],
+        "grief": ["loss", "bereavement", "mourning", "sorrow"]
     }
     query_terms = processed_query.split()
     expanded_terms = []
     for term in query_terms:
         expanded_terms.append(term)
-        for key, synonyms in physics_synonyms.items():
+        for key, synonyms in mental_health_synonyms.items():
             if term in key or key in term:
                 expanded_terms.extend(synonyms)
     expanded_query = " ".join(expanded_terms)

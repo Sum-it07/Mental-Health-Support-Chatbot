@@ -23,7 +23,7 @@ def create_vector_db():
         loader = DirectoryLoader(DATA_PATH, glob='*.pdf', loader_cls=PyPDFLoader)
         documents = loader.load()
         if not documents:
-            print(f"No PDF files found in '{DATA_PATH}'. Please add your NCERT textbooks to this folder.")
+            print(f"No PDF files found in '{DATA_PATH}'. Please add your mental health resource PDFs to this folder.")
             return
         print(f"Loaded {len(documents)} documents.")
     except Exception as e:
@@ -32,7 +32,7 @@ def create_vector_db():
 
     # 2. Split the documents into smaller chunks
     print("Splitting documents into chunks...")
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+    text_splitter = RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=100)
     texts = text_splitter.split_documents(documents)
     print(f"Split documents into {len(texts)} chunks.")
 
@@ -73,7 +73,7 @@ def create_vector_db():
     try:
         vectorstore.persist()
         print(f"Chroma vector store saved to '{VECTOR_STORE_PATH}'.")
-        print("\nIngestion complete! You can now run 'streamlit run streamlit_app.py' to start the application.")
+        print("\nIngestion complete! You can now run 'streamlit run streamlit_app_multilingual.py' to start the application.")
     except Exception as e:
         print(f"Error saving Chroma vector store: {e}")
 
@@ -82,7 +82,7 @@ if __name__ == "__main__":
     # Check if the data directory exists, create it if it doesn't
     if not os.path.exists(DATA_PATH):
         os.makedirs(DATA_PATH)
-        print(f"Created directory '{DATA_PATH}'. Please add your NCERT textbook PDFs to this folder and run the script again.")
+        print(f"Created directory '{DATA_PATH}'. Please add your mental health resource PDFs to this folder and run the script again.")
     else:
         create_vector_db()
 
