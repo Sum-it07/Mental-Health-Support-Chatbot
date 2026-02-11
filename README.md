@@ -16,11 +16,11 @@ MindfulRAG is an AI-assisted mental health companion that combines a Retrieval-A
 
 ```mermaid
 flowchart LR
-    U(User Query / Voice / Image) --> P[Preprocess Input<br/>speech-to-text (optional)<br/>synonym expansion]
-    P --> R[Hybrid Retrieval<br/>semantic (Chroma)<br/>keyword filtering]
-    R --> C[Compose Context Window]
-    C --> L[Gemini 2.5 Flash via LangChain Prompt]
-    L --> A[Empathetic Response<br/>source attributions]
+	U(User Query / Voice / Image) --> P["Preprocess Input\nspeech-to-text (optional)\nsynonym expansion"]
+	P --> R["Hybrid Retrieval\nsemantic (Chroma)\nkeyword filtering"]
+	R --> C[Compose Context Window]
+	C --> L[Gemini 2.5 Flash via LangChain Prompt]
+	L --> A["Empathetic Response\nsource attributions"]
 ```
 - **Core components:** `ingest.py` performs document loading, chunking, embedding, and persistence; `backend_multimodal.py` loads the vector store, orchestrates retrieval, and builds the prompt; `streamlit_app_multilingual.py` handles multilingual chat, voice, and optional image inputs.
 
@@ -91,5 +91,5 @@ print(response.content)
 	3. Copy the code blocks from the “Notebook Implementation” section, execute sequentially, and ensure a valid `GOOGLE_API_KEY` is loaded via `.env` or notebook environment variables.
 	4. Replace the sample query with your own and inspect both the retrieved context snippets and generated response cells.
 
-## Bonus (Optional)
-- **Streamlit / Gradio UI:** Launch the conversational UI with `streamlit run streamlit_app_multilingual.py`. The app supports text, optional voice capture (SpeechRecognition), and basic image uploads converted to base64 for contextual prompts.
+
+- **Streamlit:** Launch the conversational UI with `streamlit run streamlit_app_multilingual.py`. The app supports text and  optional voice capture (SpeechRecognition).
