@@ -1,4 +1,4 @@
-# RAG Assignment – Submission Requirements
+# RAG Assignment
 
 MindfulRAG is an AI-assisted mental health companion that combines a Retrieval-Augmented Generation (RAG) pipeline with multimodal inputs to provide empathetic, evidence-aligned guidance. It never replaces professional care and only surfaces supportive suggestions grounded in trusted references.
 
@@ -16,16 +16,11 @@ MindfulRAG is an AI-assisted mental health companion that combines a Retrieval-A
 
 ```mermaid
 flowchart LR
-		U(User Query / Voice / Image) --> P[Preprocess Input
-		- speech to text (optional)
-		- synonym expansion]
-		P --> R[Hybrid Retrieval
-		- semantic (Chroma)
-		- keyword filtering]
-		R --> C[Compose Context Window]
-		C --> L[Gemini 2.5 Flash via LangChain Prompt]
-		L --> A[Empathetic Response
-		+ source attributions]
+    U(User Query / Voice / Image) --> P[Preprocess Input<br/>speech-to-text (optional)<br/>synonym expansion]
+    P --> R[Hybrid Retrieval<br/>semantic (Chroma)<br/>keyword filtering]
+    R --> C[Compose Context Window]
+    C --> L[Gemini 2.5 Flash via LangChain Prompt]
+    L --> A[Empathetic Response<br/>source attributions]
 ```
 - **Core components:** `ingest.py` performs document loading, chunking, embedding, and persistence; `backend_multimodal.py` loads the vector store, orchestrates retrieval, and builds the prompt; `streamlit_app_multilingual.py` handles multilingual chat, voice, and optional image inputs.
 
