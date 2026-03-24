@@ -71,16 +71,74 @@ response = llm.invoke(prompt)
 print(response.content)
 ```
 - **Proper comments and markdown cells:** Annotate notebook cells with short MD sections (Overview, Ingestion, Retrieval, Generation) and inline comments explaining non-trivial steps such as the hybrid retrieval heuristic.
-- **Minimum 3 test queries with outputs:**
-	1. *“I feel overwhelmed at work, how can I cope?”* → Suggests breathing, task prioritisation, and cites stress-management workbook pages.
-	2. *“Any gentle grounding technique before exams?”* → Recommends 5-4-3-2-1 technique and mindful breathing references.
-	3. *“How to support a friend showing signs of burnout?”* → Highlights listening skills, professional referral encouragement, and relevant resource snippets.
 
 ## Future Improvements
 - **Better chunking:** Experiment with semantic-aware or adaptive chunking to preserve exercises, tables, or checklists intact.
 - **Reranking / hybrid search:** Integrate rerankers such as `bge-reranker-large` for tighter relevance ordering after initial recall.
 - **Metadata filtering:** Use tags (topic, modality, difficulty level) during ingestion to filter retrieval for user intent.
 - **UI integration:** Extend the current Streamlit front-end with progress tracking, journaling, and hand-off pathways to professional services.
+
+## Technical Specifications Summary
+
+| Feature | Specification | Reason |
+| :--- | :--- | :--- |
+| **Chunking** | Size: 1500, Overlap: 100 | Preserves context for therapeutic techniques; effective for CPU processing. |
+| **Embedding Model** | `all-MiniLM-L6-v2` | Fast, lightweight, efficient for semantic search on local CPU. |
+| **Vector Database** | Chroma | Open-source, persistent, easy integration with LangChain. |
+| **Framework** | LangChain | Simplifies RAG pipeline construction and LLM integration. |
+| **LLM** | Gemini 2.5 Flash | High speed, cost-effective, and capable of empathetic nuance. |
+
+## Detailed Test Query Outputs
+
+Below represent simulated outputs demonstrating the system's "Empathy + Evidence" approach.
+
+### Test Case 1: Work Stress
+**User Query:**
+> "I feel overwhelmed at work, how can I cope?"
+
+**Model Response:**
+> "I hear that you're feeling weighed down by work right now, and I want you to know it's valid to feel this way. 🌿
+>
+> Based on the *Stress Management Workbook (Page 12)* and *Mindfulness Guide (Page 4)*, here are a few gentle steps that might help:
+> 1.  **Chunks of Time:** valid technique is to break your tasks into small, 20-minute intervals. Focus on just one thing at a time.
+> 2.  **Box Breathing:** Pause for a moment. Inhale for 4 counts, hold for 4, exhale for 4, and hold for 4. This signals safety to your nervous system.
+> 3.  **Compassionate Boundaries:** It is okay to say 'I need a moment' or to ask for help with prioritization.
+>
+> Remember, your well-being comes before productivity. Would you like to try a quick breathing exercise together?"
+
+---
+
+### Test Case 2: Anxiety Grounding
+**User Query:**
+> "Any gentle grounding technique before exams?"
+
+**Model Response:**
+> "It is completely understandable to feel those pre-exam nerves. You have prepared, but your body is reacting to the pressure. Let's try to anchor ourselves in the present moment. ⚓
+>
+> The *Anxiety Relief Manual (Page 22)* suggests the **5-4-3-2-1 Technique**:
+> *   **5** things you see (e.g., a pen, the clock).
+> *   **4** things you can touch (e.g., the texture of your paper, your feet on the floor).
+> *   **3** things you hear (e.g., distant traffic, your breath).
+> *   **2** things you can smell.
+> *   **1** thing you can taste.
+>
+> This exercise shifts your focus from 'what if' thoughts to 'what is' right now. You've got this. Take a deep breath."
+
+---
+
+### Test Case 3: Supporting Others
+**User Query:**
+> "How to support a friend showing signs of burnout?"
+
+**Model Response:**
+> "It is incredibly kind of you to look out for your friend. Supporting someone with burnout requires patience and care. 🤝
+>
+> According to *Supporting Loved Ones (Page 8)*, here are some supportive approaches:
+> *   **Listen without Fixing:** deeply listening is often more powerful than advice. Use phrases like, 'That sounds incredibly exhausting, I'm here for you.'
+> *   **Validate their Experience:** Acknowledge their hard work and their feelings. Say, 'It makes sense that you are tired given how hard you've been running.'
+> *   **Encourage Professional Support:** Gently suggest that speaking to a counselor isn't a sign of weakness, but a tool for recovery.
+>
+> Ensure you are also protecting your own energy while being there for them. Would you like suggestions on how to start that conversation?"
 
 ## README / Report
 - **Project overview:** MindfulRAG combines curated psychoeducational PDFs with Gemini 2.5 Flash to deliver multilingual, empathetic conversations under a strict non-clinical policy.
