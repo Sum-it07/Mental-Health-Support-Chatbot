@@ -1,16 +1,33 @@
-streamlit
-python-dotenv
-langchain
-langchain-community
-langchain-google-genai
-sentence-transformers
-InstructorEmbedding
-faiss-cpu
-pypdf
-chromadb
-speechrecognition
-pyaudio
-Pillow
-streamlit-webrtc
-av
-deep-translator
+# streamlit
+# python-dotenv
+# langchain
+# langchain-community
+# langchain-google-genai
+# sentence-transformers
+# InstructorEmbedding
+# faiss-cpu
+# pypdf
+# chromadb
+# speechrecognition
+# pyaudio
+# Pillow
+# streamlit-webrtc
+# av
+# deep-translator
+
+streamlit==1.32.0
+langchain==0.2.1
+langchain-community==0.2.1
+langchain-google-genai==1.0.5
+sentence-transformers==2.7.0
+torch==2.2.2
+faiss-cpu==1.7.4
+chromadb==0.4.24
+python-dotenv==1.0.1
+pypdf==4.2.0
+Pillow==10.3.0
+deep-translator==1.11.4
+speechrecognition==3.10.1
+pyaudio==0.2.14
+streamlit-webrtc==0.47.1
+av==11.0.0

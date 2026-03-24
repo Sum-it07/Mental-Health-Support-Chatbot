@@ -11,8 +11,8 @@ import os
 from dotenv import load_dotenv
 from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
+from langchain_core.prompts import PromptTemplate
+from langchain_core.output_parsers import StrOutputParser
 from langchain_google_genai import ChatGoogleGenerativeAI
 from PIL import Image
 
@@ -78,8 +78,11 @@ User's message: {question}
 
 Your Response:
 """
-    PROMPT = PromptTemplate(template=prompt_template, input_variables=["conversation_history", "context", "question"])
-    chain = LLMChain(llm=llm, prompt=PROMPT)
+    prompt = PromptTemplate(
+        template=prompt_template,
+        input_variables=["conversation_history", "context", "question"],
+    )
+    chain = prompt | llm | StrOutputParser()
     return vectorstore, chain
 
 def hybrid_search(vectorstore, query, k=5):

@@ -236,7 +236,17 @@ if "user_language" not in st.session_state:
     st.session_state.user_language = "en"
 
 
-vectorstore, chain = load_models()
+vectorstore = None
+chain = None
+backend_init_error = None
+
+try:
+    vectorstore, chain = load_models()
+except Exception as e:
+    backend_init_error = str(e)
+    st.warning(
+        "⚠️ Backend is not ready yet. Add a valid GOOGLE_API_KEY and make sure the vector DB is available."
+    )
 
 
 
@@ -250,15 +260,63 @@ def process_voice_input():
     try:
         import speech_recognition as sr
         r = sr.Recognizer()
-        
+        try:
+            microphone_names = sr.Microphone.list_microphone_names()
+        except OSError as device_error:
+            st.error(f"🎤 Unable to access microphones: {device_error}")
+            return None
+
+        if "voice_device_index" not in st.session_state:
+            st.session_state.voice_device_index = None
+
+        def is_input_device(label: str) -> bool:
+            lowered = label.lower()
+            return any(keyword in lowered for keyword in ["mic", "input", "capture", "record"])
+
+        indexed_devices = [(idx, name) for idx, name in enumerate(microphone_names)]
+        input_devices = [(idx, name) for idx, name in indexed_devices if is_input_device(name)]
+        device_pool = input_devices or indexed_devices
+
+        device_choices = [("System default", None)]
+        device_choices.extend([(f"{idx}: {name}", idx) for idx, name in device_pool])
+
+        choice_labels = [label for label, _ in device_choices]
+
+        default_choice = 0
+        if st.session_state.voice_device_index is not None:
+            for option_idx, (_, value) in enumerate(device_choices):
+                if value == st.session_state.voice_device_index:
+                    default_choice = option_idx
+                    break
+        else:
+            for option_idx, (_, value) in enumerate(device_choices):
+                if option_idx == 0:
+                    continue
+                selected_name = device_choices[option_idx][0].lower()
+                if any(keyword in selected_name for keyword in ["microphone", "mic", "input"]):
+                    default_choice = option_idx
+                    break
+
+        selected_label = st.selectbox(
+            "Select a microphone",
+            choice_labels,
+            index=default_choice,
+            key="voice_device_selector",
+        )
+        device_index = dict(device_choices)[selected_label]
+        st.session_state.voice_device_index = device_index
+
+        st.caption("Choose the input that matches your physical microphone. Speakers/headphones won't work for recording.")
+
         # Create audio recording interface
         st.info("🎤 Click the button below and speak your question...")
-        
+
         if st.button("🎙️ Start Recording", key="voice_button"):
             with st.spinner("Listening... Speak now!"):
                 try:
                     # Use microphone as source
-                    with sr.Microphone() as source:
+                    mic_kwargs = {"device_index": device_index} if device_index is not None else {}
+                    with sr.Microphone(**mic_kwargs) as source:
                         r.adjust_for_ambient_noise(source, duration=1)
                         audio = r.listen(source, timeout=5, phrase_time_limit=10)
                     
@@ -279,8 +337,14 @@ def process_voice_input():
                 except sr.RequestError as e:
                     st.error(f"❌ Speech recognition error: {e}")
                     return None
+                except AttributeError as attr_error:
+                    st.error("🎤 That device does not provide a microphone stream. Pick another input or reconfigure Windows recording devices.")
+                    return None
+                except OSError as mic_error:
+                    st.error(f"🎤 Microphone error: {mic_error}")
+                    return None
                 except Exception as e:
-                    st.warning("🎤 Voice input not available. Please ensure you have a microphone connected.")
+                    st.warning(f"🎤 Voice input not available: {e}")
                     return None
     except ImportError:
         st.warning("🎤 Voice input requires additional packages. Please install: pip install speechrecognition pyaudio")
@@ -396,19 +460,18 @@ for message in st.session_state.messages:
 
 # --- INPUT SECTION ---
 
-with st.expander("🎤 Voice Input", expanded=False):
-    voice_text = process_voice_input()
-
 # Text input (always visible at bottom)
 text_input = st.chat_input("How are you feeling today? 💬")
 
 # Process the input
-prompt = text_input or voice_text
+prompt = text_input
 image_data = None
 
 if prompt or image_data:
     if vectorstore is None or chain is None:
-        st.error("Backend models are not loaded. Please check the error message above.")
+        st.error("Backend models are not loaded. Please check configuration and try again.")
+        if backend_init_error:
+            st.caption(f"Details: {backend_init_error}")
     else:
         # Prepare the user message
         user_message = {"role": "user", "content": prompt or "Please analyze this image"}
@@ -492,10 +555,12 @@ if prompt or image_data:
                         conversation_history = "\n".join(history_parts)
                     
                     # 6. Generate response
-                    result = chain.run(
-                        conversation_history=conversation_history,
-                        context=context, 
-                        question=original_query
+                    result = chain.invoke(
+                        {
+                            "conversation_history": conversation_history,
+                            "context": context,
+                            "question": original_query,
+                        }
                     )
                     
                     # Display the response
